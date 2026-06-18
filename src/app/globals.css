@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Bebas Neue';
+  --font-body: 'Inter';
+  --font-mono: 'JetBrains Mono';
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    @apply bg-pitch-900 text-chalk-100 antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-pitch-800; }
+  ::-webkit-scrollbar-thumb { @apply bg-pitch-600 rounded-full; }
+}
+
+@layer components {
+  /* ── Cards ─────────────────────────────────────── */
+  .card {
+    @apply bg-pitch-800 rounded-2xl border border-pitch-600/40;
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-pitch-600/80 hover:bg-pitch-700/60;
+  }
+
+  /* ── Match pill status ──────────────────────────── */
+  .status-live {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+  .status-scheduled {
+    @apply bg-pitch-700/60 text-chalk-400 border border-pitch-600/40;
+  }
+  .status-finished {
+    @apply bg-pitch-700/40 text-chalk-400 border border-pitch-600/30;
+  }
+  .status-soon {
+    @apply bg-gold-500/20 text-gold-400 border border-gold-500/30;
+  }
+
+  /* ── Score display ──────────────────────────────── */
+  .score-display {
+    font-family: var(--font-display), sans-serif;
+    @apply text-4xl tracking-wider;
+  }
+  .score-input {
+    font-family: var(--font-mono), monospace;
+    @apply w-14 h-14 text-center text-2xl font-bold bg-pitch-900 border-2 border-pitch-600
+           rounded-xl text-chalk-100 focus:border-grass-500 focus:outline-none
+           transition-colors;
+  }
+
+  /* ── Buttons ────────────────────────────────────── */
+  .btn-primary {
+    @apply bg-grass-500 hover:bg-grass-400 text-pitch-900 font-bold px-6 py-3 rounded-xl
+           transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply bg-pitch-700/50 hover:bg-pitch-700 text-chalk-100 font-medium px-5 py-2.5 rounded-xl
+           border border-pitch-600/40 hover:border-pitch-600 transition-all duration-150;
+  }
+  .btn-gold {
+    @apply bg-gold-500 hover:bg-gold-400 text-pitch-900 font-bold px-6 py-3 rounded-xl
+           transition-all duration-150 active:scale-95;
+  }
+
+  /* ── Nav ────────────────────────────────────────── */
+  .nav-link {
+    @apply flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-chalk-400
+           hover:text-chalk-100 hover:bg-pitch-700/60 transition-all duration-150;
+  }
+  .nav-link-active {
+    @apply text-grass-400 bg-grass-500/10;
+  }
+
+  /* ── Leaderboard ────────────────────────────────── */
+  .rank-1 { @apply text-gold-400; }
+  .rank-2 { @apply text-chalk-300; }
+  .rank-3 { @apply text-amber-600; }
+
+  /* ── Banker tag ─────────────────────────────────── */
+  .banker-tag {
+    @apply inline-flex items-center gap-1 text-xs font-bold text-gold-400
+           bg-gold-500/10 border border-gold-500/30 px-2 py-0.5 rounded-full;
+  }
+
+  /* ── Live pulse dot ─────────────────────────────── */
+  .live-dot {
+    @apply w-2 h-2 rounded-full bg-red-500 animate-pulse-slow;
+  }
+}
+
+/* ── Pitch grass texture on backgrounds ──────────── */
+.pitch-bg {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 40px,
+      rgba(34, 197, 94, 0.015) 40px,
+      rgba(34, 197, 94, 0.015) 80px
+    );
+}
+
+/* ── Number input arrows hide ────────────────────── */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type='number'] { -moz-appearance: textfield; }
+
+/* ── Animate in ───────────────────────────────────── */
+.animate-in { animation: slideUp 0.35s ease-out both; }
