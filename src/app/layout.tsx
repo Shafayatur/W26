@@ -4,7 +4,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'WC26 · Ajke kar khela?',
   description: 'FIFA World Cup 2026 — Ajke kar khela?',
-  themeColor: '#1478a7',
+  themeColor: '#0a1628',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

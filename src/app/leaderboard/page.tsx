@@ -38,7 +38,7 @@ export default async function LeaderboardPage() {
           <h1 className="text-2xl font-bold text-chalk-100" style={{ fontFamily: 'var(--font-display)' }}>
             Leaderboard
           </h1>
-          <p className="text-xs text-chalk-400 mt-0.5">Family standings — WC 2026</p>
+          <p className="text-xs text-chalk-400 mt-0.5">Who is the king?</p>
         </div>
 
         {entries.length >= 1 && (
