@@ -85,7 +85,7 @@ export default function FixturesClient({ matches, predictions, userId }: Props) 
     <div className="pt-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-chalk-100" style={{ fontFamily: 'var(--font-display)' }}>
-          Fixtures
+          Ajke kar khela? 🏟️
         </h1>
         <span className="text-xs text-chalk-400">All times in BD</span>
       </div>
