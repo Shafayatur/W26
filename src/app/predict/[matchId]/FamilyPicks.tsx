@@ -7,7 +7,7 @@ import { useState } from 'react'
 import clsx from 'clsx'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
-interface ExtendedPrediction extends Prediction {
+interface ExtendedPrediction extends Omit<Prediction, 'profiles'> {
   profiles?: { id: string; name: string; avatar_emoji: string }
   reactions?: Reaction[]
   comments?: Comment[]
