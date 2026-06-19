@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Trophy, Target, GitBranch, User } from 'lucide-react'
+import { CalendarDays, Trophy, Target, GitBranch, User, Users } from 'lucide-react'
 import clsx from 'clsx'
 
 const NAV_ITEMS = [
