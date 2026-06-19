@@ -79,3 +79,20 @@ export const BADGE_DEFINITIONS = [
   { key: 'upset_caller', emoji: '😈', label: 'Upset King', desc: 'Predicted a major upset correctly' },
   { key: 'cold_streak', emoji: '🧊', label: 'Frozen', desc: '3 wrong in a row' },
 ] as const
+
+
+export interface Group {
+  id: string
+  name: string
+  code: string
+  created_by: string
+  created_at: string
+}
+
+export interface GroupMember {
+  id: string
+  group_id: string
+  user_id: string
+  joined_at: string
+  profiles?: Profile
+}

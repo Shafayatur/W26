@@ -15,7 +15,7 @@ export function calculatePoints(
   isBanker: boolean
 ): PointsBreakdown {
   let base = 0
-  let reason = 'No points'
+  let reason = 'Wrong prediction'
   const multiplier = isBanker ? 2 : 1
 
   const actualWinner = actualHome > actualAway ? 'HOME' : actualHome < actualAway ? 'AWAY' : 'DRAW'
@@ -25,17 +25,22 @@ export function calculatePoints(
     base = 5
     reason = 'Exact score! 🎯'
   } else if (predWinner === actualWinner) {
-    base = 2
+    base = 3
     reason = 'Correct result ✓'
     const predDiff = predHome - predAway
     const actualDiff = actualHome - actualAway
     if (predDiff === actualDiff) {
-      base += 1
+      base = 4
       reason = 'Correct result + goal diff ✓✓'
     }
+  } else {
+    // Wrong prediction
+    base = isBanker ? -5 : -1
+    reason = isBanker ? 'Wrong banker 💀' : 'Wrong prediction ✗'
+    return { base, multiplier: 1, total: base, reason }
   }
 
-  return { base, multiplier, total: base > 0 ? base * multiplier : 0, reason }
+  return { base, multiplier, total: base * multiplier, reason }
 }
 
 export function getPointsColor(points: number | null): string {

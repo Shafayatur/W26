@@ -1,13 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, Trophy, Target, GitBranch, User } from 'lucide-react'
+import { CalendarDays, Target, GitBranch, Users, User } from 'lucide-react'
 import clsx from 'clsx'
 
 const NAV_ITEMS = [
   { href: '/fixtures', label: 'Fixtures', icon: CalendarDays },
   { href: '/predict', label: 'Predict', icon: Target },
-  { href: '/leaderboard', label: 'Board', icon: Trophy },
+  { href: '/groups', label: 'Groups', icon: Users },
   { href: '/bracket', label: 'Bracket', icon: GitBranch },
   { href: '/profile', label: 'Me', icon: User },
 ]
