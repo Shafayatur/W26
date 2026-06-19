@@ -6,6 +6,7 @@ import clsx from 'clsx'
 
 const NAV_ITEMS = [
   { href: '/fixtures', label: 'Fixtures', icon: CalendarDays },
+  { href: '/bracket', label: 'Bracket', icon: GitBranch },
   { href: '/predict', label: 'Predict', icon: Target },
   { href: '/groups', label: 'Groups', icon: Users },
   { href: '/profile', label: 'Me', icon: User },
