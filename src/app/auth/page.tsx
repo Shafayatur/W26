@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const AVATAR_OPTIONS = ['⚽', '🏆', '🦁', '🐯', '🦅', '🔥', '⚡', '🌟', '🎯', '👑']
+const AVATAR_OPTIONS = ['⚽', '🏆', '🦁', '🐯', '🦅', '🔥', '⚡', '🌟', '🎯', '👑', '💀', '🙂']
 
 export default function AuthPage() {
   const [mode, setMode] = useState<'join' | 'login'>('join')
@@ -78,9 +78,9 @@ export default function AuthPage() {
       <div className="text-center space-y-2">
         <div className="text-5xl mb-3">🏆</div>
         <h1 className="text-3xl font-bold text-chalk-100" style={{ fontFamily: 'var(--font-display)' }}>
-          WC26 Family Predictor
+          WC26 Match Predictor
         </h1>
-        <p className="text-chalk-400 text-sm">FIFA World Cup 2026 · Family prediction game</p>
+        <p className="text-chalk-400 text-sm">FIFA World Cup 2026 · Match prediction game</p>
       </div>
 
       <div className="flex gap-1 bg-pitch-800/80 p-1 rounded-2xl border border-pitch-600/30">
@@ -110,7 +110,7 @@ export default function AuthPage() {
             </div>
             <div>
               <label className="text-xs font-medium text-chalk-400 uppercase tracking-wider block mb-1.5">Your name</label>
-              <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Rina, Rafi, Abbu…" maxLength={30}
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Alishba, Miftah, Maryam..." maxLength={30}
                 className="w-full bg-pitch-900/60 border border-pitch-600/40 rounded-xl px-4 py-3 text-chalk-100 placeholder:text-chalk-400 focus:outline-none focus:border-grass-500/60 transition-colors" />
             </div>
           </>
@@ -124,7 +124,7 @@ export default function AuthPage() {
               value={username}
               onChange={e => setUsername(sanitize(e.target.value))}
               onKeyDown={e => e.key === 'Enter' && (mode === 'join' ? handleJoin() : handleLogin())}
-              placeholder="e.g. rafi_07"
+              placeholder="e.g. cr7"
               maxLength={20}
               className="w-full bg-pitch-900/60 border border-pitch-600/40 rounded-xl pl-8 pr-4 py-3 text-chalk-100 placeholder:text-chalk-400 focus:outline-none focus:border-grass-500/60 transition-colors font-mono"
             />
