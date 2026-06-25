@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     // For each date that had a finished match, check if ALL matches that day are done.
     // If so, calculate the daily winner for that date.
     let dailyWinnersCalculated = 0
-    for (const date of finishedDatesBD) {
+    for (const date of Array.from(finishedDatesBD)) {
       const { data: dayMatches } = await supabase
         .from('matches')
         .select('status, kickoff_utc')

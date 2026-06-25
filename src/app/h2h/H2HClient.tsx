@@ -63,7 +63,7 @@ export default function H2HClient({ currentUserId, members, predictions }: Props
     const sharedMatchIds = useMemo(() => {
         if (selected.length === 0) return []
         const sets = selected.map(uid => new Set(Object.keys(predByUser[uid] ?? {})))
-        const first = [...sets[0]]
+        const first = Array.from(sets[0])
         return first.filter(id => sets.every(s => s.has(id)))
     }, [selected, predByUser])
 

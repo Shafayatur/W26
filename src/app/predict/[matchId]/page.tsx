@@ -31,7 +31,7 @@ export default async function PredictMatchPage({ params }: { params: { matchId: 
     .select('user_id')
     .in('group_id', myGroupIds.length > 0 ? myGroupIds : ['none'])
 
-  const visibleUserIds = [...new Set((groupMembers ?? []).map(m => m.user_id))]
+  const visibleUserIds = Array.from(new Set((groupMembers ?? []).map(m => m.user_id)))
 
   const [{ data: match }, { data: myPred }, { data: allPreds }] = await Promise.all([
     supabase.from('matches').select('*').eq('id', params.matchId).single(),

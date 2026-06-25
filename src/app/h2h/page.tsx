@@ -33,7 +33,7 @@ export default async function H2HPage() {
         const p = m.profiles as any
         if (p && !memberMap.has(p.id)) memberMap.set(p.id, p)
     }
-    const members = [...memberMap.values()]
+    const members = Array.from(memberMap.values())
 
     // Step 3: get all scored predictions for those members
     const memberIds = members.map(m => m.id)
