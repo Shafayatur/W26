@@ -13,12 +13,18 @@ export default async function ProfilePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
+  
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('*, predictions(id, points_earned, is_banker, scored_at, matches(home_team, away_team, home_score, away_score))')
     .eq('id', user.id)
     .single()
+
+  const { data: tournamentPreds } = await supabase
+    .from('tournament_predictions')
+    .select('*')
+    .eq('user_id', user.id)
 
   if (!profile) redirect('/auth')
 
@@ -56,7 +62,9 @@ export default async function ProfilePage() {
             { label: 'Exact scores', value: exactScore.length, emoji: '🎯' },
             { label: 'Banker wins', value: bankerWins.length, emoji: '💰' },
             { label: 'Best streak', value: profile.best_streak, emoji: '🔥' },
-            { label: 'Accuracy', value: scored.length ? `${Math.round(correct.length/scored.length*100)}%` : '—', emoji: '📊' },
+            { label: 'Accuracy', value: scored.length ? `${Math.round(correct.length / scored.length * 100)}%` : '—', emoji: '📊' },
+            { label: 'Daily wins', value: profile.daily_wins ?? 0, emoji: '🏅' },
+            { label: 'Tournament pts', value: (tournamentPreds ?? []).reduce((s, p) => s + (p.points_earned ?? 0), 0), emoji: '🏆' },
           ].map(({ label, value, emoji }) => (
             <div key={label} className="card p-4 text-center">
               <div className="text-2xl mb-1">{emoji}</div>
@@ -74,8 +82,8 @@ export default async function ProfilePage() {
               {form.map((p: any, i: number) => (
                 <div key={i} className={clsx('flex-1 h-10 rounded-lg flex items-center justify-center text-sm font-bold border',
                   p.points_earned >= 5 ? 'bg-gold-500/20 border-gold-500/40 text-gold-400' :
-                  p.points_earned > 0  ? 'bg-grass-500/20 border-grass-500/40 text-grass-400' :
-                                          'bg-red-500/10 border-red-500/20 text-red-400')}>
+                    p.points_earned > 0 ? 'bg-grass-500/20 border-grass-500/40 text-grass-400' :
+                      'bg-red-500/10 border-red-500/20 text-red-400')}>
                   {p.points_earned >= 5 ? '🎯' : p.points_earned > 0 ? '✓' : '✗'}
                 </div>
               ))}

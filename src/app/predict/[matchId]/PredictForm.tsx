@@ -115,7 +115,7 @@ export default function PredictForm({ match, existingPrediction, userId, isLocke
         <div className={clsx('rounded-xl p-4 text-center space-y-1 border',
           pointsBreakdown.total > 0 ? 'bg-grass-500/10 border-grass-500/30' : 'bg-red-500/10 border-red-500/20')}>
           <div className={clsx('text-2xl font-bold', pointsBreakdown.total > 0 ? 'text-grass-400' : 'text-red-400')}>
-            {pointsBreakdown.total > 0 ? `+${pointsBreakdown.total}` : '0'} pts
+            {pointsBreakdown.total > 0 ? `+${pointsBreakdown.total}` : pointsBreakdown.total} pts
           </div>
           <div className="text-sm text-chalk-300">{pointsBreakdown.reason}</div>
           {pointsBreakdown.multiplier > 1 && pointsBreakdown.base > 0 && (

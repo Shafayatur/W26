@@ -68,7 +68,7 @@ export default function FamilyPicks({ predictions, currentUserId, matchFinished,
               <div className="flex items-center gap-2">
                 {pred.points_earned !== null && (
                   <span className={clsx('text-sm font-bold', getPointsColor(pred.points_earned))}>
-                    {pred.points_earned > 0 ? `+${pred.points_earned}` : '0'} pts
+                    {pred.points_earned > 0 ? `+${pred.points_earned}` : pred.points_earned} pts
                   </span>
                 )}
                 <button

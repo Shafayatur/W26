@@ -96,3 +96,47 @@ export interface GroupMember {
   joined_at: string
   profiles?: Profile
 }
+export interface DailyWinner {
+  id: string
+  winner_date: string
+  user_id: string
+  day_points: number
+  created_at: string
+  profiles?: Profile
+}
+
+export type TournamentCategory =
+  | 'CHAMPION' | 'RUNNER_UP'
+  | 'SEMIFINALIST_1' | 'SEMIFINALIST_2' | 'SEMIFINALIST_3' | 'SEMIFINALIST_4'
+  | 'GOLDEN_BOOT' | 'GOLDEN_GLOVE'
+
+export interface TournamentPrediction {
+  id: string
+  user_id: string
+  category: TournamentCategory
+  pick_value: string
+  locked_days_remaining: number | null
+  points_earned: number | null
+  is_correct: boolean | null
+  created_at: string
+  updated_at: string
+  profiles?: Profile
+}
+
+export interface TournamentResult {
+  category: TournamentCategory
+  actual_value: string | null
+  resolved_at: string | null
+  event_date: string
+}
+
+export const TOURNAMENT_CATEGORY_LABELS: Record<TournamentCategory, string> = {
+  CHAMPION: '🏆 Champion',
+  RUNNER_UP: '🥈 Runner-up',
+  SEMIFINALIST_1: '🏟️ Semifinalist',
+  SEMIFINALIST_2: '🏟️ Semifinalist',
+  SEMIFINALIST_3: '🏟️ Semifinalist',
+  SEMIFINALIST_4: '🏟️ Semifinalist',
+  GOLDEN_BOOT: '⚽ Golden Boot',
+  GOLDEN_GLOVE: '🧤 Golden Glove',
+}

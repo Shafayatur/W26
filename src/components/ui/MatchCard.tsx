@@ -27,11 +27,11 @@ export default function MatchCard({ match, prediction, showPredictLink = true }:
           {isLive && <span className="live-dot" />}
           <span className={clsx('text-xs font-medium px-2 py-0.5 rounded-full',
             isLive ? 'status-live' :
-            soon ? 'status-soon' :
-            isFinished ? 'status-finished' : 'status-scheduled'
+              soon ? 'status-soon' :
+                isFinished ? 'status-finished' : 'status-scheduled'
           )}>
             {isLive ? '● LIVE' : soon ? `⚡ ${getCountdown(match.kickoff_utc)}` :
-             isFinished ? 'Full Time' : formatBDTime(match.kickoff_utc)}
+              isFinished ? 'Full Time' : formatBDTime(match.kickoff_utc)}
           </span>
           {match.group_name && (
             <span className="text-xs text-chalk-400">{match.group_name}</span>
@@ -84,7 +84,7 @@ export default function MatchCard({ match, prediction, showPredictLink = true }:
           </div>
           {prediction.points_earned !== null && (
             <span className={clsx('text-sm font-bold', getPointsColor(prediction.points_earned))}>
-              {prediction.points_earned > 0 ? `+${prediction.points_earned} pts` : '0 pts'}
+              {prediction.points_earned > 0 ? `+${prediction.points_earned} pts` : `${prediction.points_earned} pts`}
             </span>
           )}
         </div>

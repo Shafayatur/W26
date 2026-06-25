@@ -11,6 +11,7 @@ export default async function PredictPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
+  
 
   const [{ data: matches }, { data: predictions }] = await Promise.all([
     supabase.from('matches').select('*').eq('status', 'SCHEDULED').order('kickoff_utc', { ascending: true }).limit(30),

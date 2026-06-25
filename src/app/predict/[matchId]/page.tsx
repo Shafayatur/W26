@@ -15,11 +15,31 @@ export default async function PredictMatchPage({ params }: { params: { matchId: 
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
+  
+
+  // Get all groups this user belongs to
+  const { data: myMemberships } = await supabase
+    .from('group_members')
+    .select('group_id')
+    .eq('user_id', user.id)
+
+  const myGroupIds = (myMemberships ?? []).map(m => m.group_id)
+
+  // Get all users in those groups
+  const { data: groupMembers } = await supabase
+    .from('group_members')
+    .select('user_id')
+    .in('group_id', myGroupIds.length > 0 ? myGroupIds : ['none'])
+
+  const visibleUserIds = [...new Set((groupMembers ?? []).map(m => m.user_id))]
 
   const [{ data: match }, { data: myPred }, { data: allPreds }] = await Promise.all([
     supabase.from('matches').select('*').eq('id', params.matchId).single(),
     supabase.from('predictions').select('*').eq('match_id', params.matchId).eq('user_id', user.id).maybeSingle(),
-    supabase.from('predictions').select('*, profiles(id, name, avatar_emoji), reactions(*), comments(*, profiles(name, avatar_emoji))').eq('match_id', params.matchId),
+    supabase.from('predictions')
+      .select('*, profiles(id, name, avatar_emoji), reactions(*), comments(*, profiles(name, avatar_emoji))')
+      .eq('match_id', params.matchId)
+      .in('user_id', visibleUserIds.length > 0 ? visibleUserIds : [user.id]),
   ])
 
   if (!match) notFound()

@@ -1,10 +1,11 @@
 'use client'
+import Link from 'next/link'
 import { useState, useMemo } from 'react'
 import type { Match, Prediction } from '@/types'
 import MatchCard from '@/components/ui/MatchCard'
 import { formatInTimeZone } from 'date-fns-tz'
 import { BD_TIMEZONE, getTodayBD } from '@/lib/time'
-import { Zap, Clock, CheckCircle, CalendarDays, Search, X } from 'lucide-react'
+import { Zap, Clock, CheckCircle, CalendarDays, Search, X, Bell } from 'lucide-react'
 import clsx from 'clsx'
 
 type Tab = 'today' | 'live' | 'upcoming' | 'results'
@@ -13,6 +14,7 @@ interface Props {
   matches: Match[]
   predictions: Prediction[]
   userId: string
+  pinnedAnnouncement?: { title: string; body: string; emoji: string } | null
 }
 
 const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
@@ -22,7 +24,7 @@ const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: 'results', label: 'Results', icon: <CheckCircle size={14} /> },
 ]
 
-export default function FixturesClient({ matches, predictions, userId }: Props) {
+export default function FixturesClient({ matches, predictions, userId, pinnedAnnouncement }: Props) {
   const [tab, setTab] = useState<Tab>('today')
   const [query, setQuery] = useState('')
   const today = getTodayBD()
@@ -89,6 +91,20 @@ export default function FixturesClient({ matches, predictions, userId }: Props) 
         </h1>
         <span className="text-xs text-chalk-400">All times in BD</span>
       </div>
+      {/* Pinned announcement banner */}
+      {pinnedAnnouncement && (
+        <Link href="/announcements" className="flex items-start gap-2.5 bg-gold-500/10 border border-gold-500/25
+          rounded-xl p-3 hover:bg-gold-500/15 transition-colors">
+          <span className="text-xl flex-shrink-0">{pinnedAnnouncement.emoji}</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold text-gold-400 flex items-center gap-1">
+              <Bell size={10} /> Announcement
+            </div>
+            <div className="text-sm font-medium text-chalk-100 truncate">{pinnedAnnouncement.title}</div>
+          </div>
+          <span className="text-chalk-400 text-xs mt-0.5">→</span>
+        </Link>
+      )}
 
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-chalk-400" />
