@@ -101,7 +101,7 @@ export default async function ProfilePage() {
                   {p.matches?.home_team} vs {p.matches?.away_team}
                 </div>
                 <div className={clsx('font-bold ml-2', getPointsColor(p.points_earned))}>
-                  {p.points_earned > 0 ? `+${p.points_earned}` : '0'} pts
+                  {p.points_earned > 0 ? `+${p.points_earned}` : p.points_earned} pts
                 </div>
               </div>
             ))}

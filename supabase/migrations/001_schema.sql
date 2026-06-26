@@ -138,7 +138,6 @@ declare
   m record;
   p record;
   pts integer;
-  multiplier integer;
 begin
   select * into m from public.matches where id = p_match_id;
   if not found or m.status != 'FINISHED' then return; end if;
@@ -148,26 +147,34 @@ begin
     where match_id = p_match_id and points_earned is null
   loop
     pts := 0;
-    multiplier := case when p.is_banker then 2 else 1 end;
 
     -- Exact scoreline: 5 pts
     if p.predicted_home = m.home_score and p.predicted_away = m.away_score then
       pts := 5;
+      if p.is_banker then pts := 10; end if;
     else
-      -- Correct winner/draw: 2 pts
-      if (p.predicted_home > p.predicted_away and m.winner = 'HOME') or
-         (p.predicted_home < p.predicted_away and m.winner = 'AWAY') or
+      -- Correct winner/draw
+      if (p.predicted_home > p.predicted_away and m.winner = 'HOME_TEAM') or
+         (p.predicted_home < p.predicted_away and m.winner = 'AWAY_TEAM') or
          (p.predicted_home = p.predicted_away and m.winner = 'DRAW') then
-        pts := 2;
-        -- Correct goal difference bonus: +1
+        
+        -- Correct goal difference bonus
         if (p.predicted_home - p.predicted_away) = (m.home_score - m.away_score) then
-          pts := pts + 1;
+          pts := 4;
+          if p.is_banker then pts := 8; end if;
+        else
+          pts := 3;
+          if p.is_banker then pts := 6; end if;
+        end if;
+      else
+        -- Wrong prediction
+        if p.is_banker then
+          pts := -5;
+        else
+          pts := -1;
         end if;
       end if;
     end if;
-
-    -- Apply banker multiplier (only if correct)
-    if pts > 0 then pts := pts * multiplier; end if;
 
     -- Save points on prediction
     update public.predictions
