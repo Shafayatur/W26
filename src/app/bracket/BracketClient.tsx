@@ -282,15 +282,14 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
 
                         <div className="divide-y divide-pitch-600/30">
                             {/* Header row */}
-                            <div className="grid px-3 py-1.5 text-[10px] text-chalk-400 font-medium"
-                                style={{ gridTemplateColumns: '1fr 2rem 2rem 2rem 2rem 2rem 2rem 2.8rem 2.4rem' }}>
+                            <div className="grid px-3 py-1.5 text-[10px] text-chalk-400 font-medium grid-cols-[1fr_2rem_2.8rem_2.4rem] sm:grid-cols-[1fr_2rem_2rem_2rem_2rem_2rem_2rem_2.8rem_2.4rem]">
                                 <div>Team</div>
                                 <div className="text-center">P</div>
-                                <div className="text-center">W</div>
-                                <div className="text-center">D</div>
-                                <div className="text-center">L</div>
-                                <div className="text-center">GF</div>
-                                <div className="text-center">GA</div>
+                                <div className="text-center hidden sm:block">W</div>
+                                <div className="text-center hidden sm:block">D</div>
+                                <div className="text-center hidden sm:block">L</div>
+                                <div className="text-center hidden sm:block">GF</div>
+                                <div className="text-center hidden sm:block">GA</div>
                                 <div className="text-center">GD</div>
                                 <div className="text-center font-bold">Pts</div>
                             </div>
@@ -304,13 +303,12 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
 
                                 return (
                                     <div key={t.team}
-                                        className={clsx('grid px-3 py-2 text-xs items-center transition-opacity',
+                                        className={clsx('grid px-3 py-2 text-xs items-center transition-opacity grid-cols-[1fr_2rem_2.8rem_2.4rem] sm:grid-cols-[1fr_2rem_2rem_2rem_2rem_2rem_2rem_2.8rem_2.4rem]',
                                             isTop2 && i === 0 ? 'bg-grass-500/10' :
                                                 isTop2 ? 'bg-grass-500/5' :
                                                     isBest8Third ? 'bg-gold-500/5' :
                                                         isEliminated ? 'opacity-50' : ''
-                                        )}
-                                        style={{ gridTemplateColumns: '1fr 2rem 2rem 2rem 2rem 2rem 2rem 2.8rem 2.4rem' }}>
+                                        )}>
 
                                         {/* Team name */}
                                         <div className="flex items-center gap-1.5 min-w-0">
@@ -318,7 +316,7 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
                                                 isTop2 ? 'bg-grass-500' :
                                                     isBest8Third ? 'bg-gold-400' :
                                                         isEliminated ? 'bg-red-500/60' : 'bg-pitch-600')} />
-                                            <span className="text-base leading-none flex-shrink-0">{flagEmoji(t.code)}</span>
+                                            <span className="text-base leading-none flex-shrink-0 hidden sm:inline-block">{flagEmoji(t.code)}</span>
                                             <span className={clsx('truncate',
                                                 isTop2 ? 'text-chalk-100 font-medium' :
                                                     isBest8Third ? 'text-chalk-100 font-medium' :
@@ -328,11 +326,11 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
                                         </div>
 
                                         <span className="text-center text-chalk-400">{t.mp}</span>
-                                        <span className="text-center text-chalk-300">{t.w}</span>
-                                        <span className="text-center text-chalk-400">{t.d}</span>
-                                        <span className="text-center text-chalk-400">{t.l}</span>
-                                        <span className="text-center text-chalk-400">{t.gf}</span>
-                                        <span className="text-center text-chalk-400">{t.ga}</span>
+                                        <span className="text-center text-chalk-300 hidden sm:block">{t.w}</span>
+                                        <span className="text-center text-chalk-400 hidden sm:block">{t.d}</span>
+                                        <span className="text-center text-chalk-400 hidden sm:block">{t.l}</span>
+                                        <span className="text-center text-chalk-400 hidden sm:block">{t.gf}</span>
+                                        <span className="text-center text-chalk-400 hidden sm:block">{t.ga}</span>
                                         <span className={clsx('text-center font-mono text-[11px]',
                                             t.gd > 0 ? 'text-grass-400' :
                                                 t.gd < 0 ? 'text-red-400' : 'text-chalk-400')}>
