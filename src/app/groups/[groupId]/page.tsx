@@ -13,7 +13,7 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/auth')
-    
+
 
     const [{ data: group }, { data: members }, { data: groupMatches }] = await Promise.all([
         supabase.from('groups').select('*').eq('id', params.groupId).single(),
@@ -166,60 +166,6 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
                         ))}
                     </div>
                 </div>
-
-                {/* Tournament Group Standings */}
-                {Object.keys(groupedTeams).length > 0 && (
-                    <div className="space-y-3">
-                        <h2 className="text-xs font-semibold text-chalk-400 uppercase tracking-wider">
-                            WC Tournament Standings
-                        </h2>
-                        {Object.entries(groupedTeams).sort().map(([grpName, teams]) => (
-                            <div key={grpName} className="card overflow-hidden">
-                                <div className="bg-pitch-700/60 px-3 py-2 text-xs font-bold text-gold-400">{grpName}</div>
-                                <div className="divide-y divide-pitch-600/30">
-                                    {/* Header */}
-                                    <div className="grid grid-cols-8 px-3 py-1.5 text-[10px] text-chalk-400 font-medium">
-                                        <div className="col-span-3">Team</div>
-                                        <div className="text-center">P</div>
-                                        <div className="text-center">W</div>
-                                        <div className="text-center">D</div>
-                                        <div className="text-center">L</div>
-                                        <div className="text-center font-bold">Pts</div>
-                                    </div>
-                                    {teams.map((t, i) => {
-                                        const isThrough = i < 2 // top 2 advance (simplified)
-                                        return (
-                                            <div key={t.name} className={clsx(
-                                                'grid grid-cols-8 px-3 py-2 text-xs items-center',
-                                                isThrough && i === 0 ? 'bg-grass-500/10' :
-                                                    isThrough ? 'bg-grass-500/5' : ''
-                                            )}>
-                                                <div className="col-span-3 flex items-center gap-1.5">
-                                                    <span className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0',
-                                                        isThrough ? 'bg-grass-500' : 'bg-pitch-600')} />
-                                                    <span className={clsx('truncate', isThrough ? 'text-chalk-100 font-medium' : 'text-chalk-400')}>
-                                                        {t.name}
-                                                    </span>
-                                                </div>
-                                                <div className="text-center text-chalk-400">{t.played}</div>
-                                                <div className="text-center text-chalk-400">{t.won}</div>
-                                                <div className="text-center text-chalk-400">{t.drawn}</div>
-                                                <div className="text-center text-chalk-400">{t.lost}</div>
-                                                <div className={clsx('text-center font-bold', isThrough ? 'text-grass-400' : 'text-chalk-300')}>
-                                                    {t.pts}
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                                <div className="px-3 py-1.5 text-[10px] text-chalk-400 bg-pitch-900/40">
-                                    <span className="inline-block w-2 h-2 rounded-full bg-grass-500 mr-1" />
-                                    Advancing to Round of 16
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
         </AppShell>
     )

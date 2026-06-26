@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import type { Match } from '@/types'
 import { flagEmoji } from '@/lib/football-api'
 import { formatBDTime, formatBDDay } from '@/lib/time'
-import { List, GitBranch, BarChart2, ChevronRight } from 'lucide-react'
+import { List, GitBranch, BarChart2 } from 'lucide-react'
 import clsx from 'clsx'
 
 interface Props { matches: Match[] }
@@ -20,7 +20,6 @@ const STAGE_LABEL: Record<string, string> = {
 }
 
 const KNOCKOUT_MAP: Record<string, { label: string, lName: string, rName: string }> = {
-    // LAST_32
     '537417': { label: 'M73', lName: '2A', rName: '2B' },
     '537415': { label: 'M74', lName: '1E', rName: '3 A/B/C/D/F' },
     '537423': { label: 'M75', lName: '1F', rName: '2C' },
@@ -37,8 +36,6 @@ const KNOCKOUT_MAP: Record<string, { label: string, lName: string, rName: string
     '537427': { label: 'M86', lName: '1J', rName: '2H' },
     '537428': { label: 'M87', lName: '1K', rName: '3 D/E/I/J/L' },
     '537430': { label: 'M88', lName: '2D', rName: '2G' },
-    
-    // LAST_16
     '537376': { label: 'M89', lName: 'W74', rName: 'W77' },
     '537375': { label: 'M90', lName: 'W73', rName: 'W75' },
     '537377': { label: 'M91', lName: 'W76', rName: 'W78' },
@@ -47,23 +44,15 @@ const KNOCKOUT_MAP: Record<string, { label: string, lName: string, rName: string
     '537380': { label: 'M94', lName: 'W81', rName: 'W82' },
     '537381': { label: 'M95', lName: 'W86', rName: 'W88' },
     '537382': { label: 'M96', lName: 'W85', rName: 'W87' },
-    
-    // QUARTER_FINALS
     '537383': { label: 'M97', lName: 'W89', rName: 'W90' },
     '537384': { label: 'M98', lName: 'W93', rName: 'W94' },
     '537385': { label: 'M99', lName: 'W91', rName: 'W92' },
     '537386': { label: 'M100', lName: 'W95', rName: 'W96' },
-    
-    // SEMI_FINALS
     '537387': { label: 'M101', lName: 'W97', rName: 'W98' },
     '537388': { label: 'M102', lName: 'W99', rName: 'W100' },
-    
-    // THIRD_PLACE
     '537389': { label: 'M103', lName: 'L101', rName: 'L102' },
-    
-    // FINAL
     '537390': { label: 'M104', lName: 'W101', rName: 'W102' }
-};
+}
 
 const LEFT_BRACKET = {
     LAST_32: ['537415', '537424', '537417', '537423', '537426', '537419', '537421', '537420'],
@@ -94,7 +83,6 @@ interface TeamStat {
 
 function computeStandings(matches: Match[]): Record<string, TeamStat[]> {
     const groups: Record<string, Record<string, TeamStat>> = {}
-
     const groupMatches = matches.filter(m => m.stage === 'GROUP_STAGE' && m.group_name)
 
     for (const m of groupMatches) {
@@ -131,7 +119,6 @@ function computeStandings(matches: Match[]): Record<string, TeamStat[]> {
         }
     }
 
-    // Sort each group: Pts → GD → GF → name
     const result: Record<string, TeamStat[]> = {}
     for (const [g, teams] of Object.entries(groups)) {
         result[g] = Object.values(teams).sort((a, b) =>
@@ -269,26 +256,16 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
         )
     }
 
-    return (
-        <div className="space-y-4">
-            {/* Legend */}
-            <div className="flex items-center gap-4 px-1">
-                <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-grass-400" />
-                    <span className="text-[11px] text-chalk-400">Qualified</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-gold-400" />
-                    <span className="text-[11px] text-chalk-400">Qualifying zone</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-400" />
-                    <span className="text-[11px] text-chalk-400">Eliminated</span>
-                </div>
-            </div>
+    // Compute best 8 third-placed teams across all 12 groups
+    const allThirdPlace = groups
+        .filter(([, teams]) => teams.length >= 3)
+        .map(([, teams]) => teams[2])
+        .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.team.localeCompare(b.team))
+    const best8Third = new Set(allThirdPlace.slice(0, 8).map(t => t.team))
 
+    return (
+        <div className="space-y-3">
             {groups.map(([groupName, teams]) => {
-                // WC 2026: 4 teams per group, 6 matches total (each team plays 3)
                 const totalMatchesPlayed = teams.reduce((sum, t) => sum + t.mp, 0) / 2
                 const groupComplete = totalMatchesPlayed >= 6
                 const hasStarted = teams.some(t => t.mp > 0)
@@ -296,97 +273,92 @@ function StandingsView({ standings }: { standings: Record<string, TeamStat[]> })
                 return (
                     <div key={groupName} className="card overflow-hidden">
                         {/* Group header */}
-                        <div className="px-3 py-2 border-b border-pitch-600/40 flex items-center justify-between bg-pitch-800/60">
-                            <span className="text-xs font-bold text-gold-400 uppercase tracking-wider">{groupName}</span>
+                        <div className="bg-pitch-700/60 px-3 py-2 flex items-center justify-between">
+                            <span className="text-xs font-bold text-gold-400">{groupName}</span>
                             <span className="text-[10px] text-chalk-400">
                                 {groupComplete ? 'Final standings' : hasStarted ? 'In progress' : 'Not started'}
                             </span>
                         </div>
 
-                        {/* Column headers */}
-                        <div className="grid items-center px-3 py-1.5 text-[10px] font-semibold text-chalk-400 uppercase tracking-wider border-b border-pitch-600/20"
-                            style={{ gridTemplateColumns: '1.4rem 1fr 2rem 2rem 2rem 2rem 2.8rem 2.4rem 3.2rem' }}>
-                            <span className="text-center">#</span>
-                            <span>Team</span>
-                            <span className="text-center">MP</span>
-                            <span className="text-center">W</span>
-                            <span className="text-center">D</span>
-                            <span className="text-center">L</span>
-                            <span className="text-center">GD</span>
-                            <span className="text-center">Pts</span>
-                            <span></span>
-                        </div>
+                        <div className="divide-y divide-pitch-600/30">
+                            {/* Header row */}
+                            <div className="grid px-3 py-1.5 text-[10px] text-chalk-400 font-medium"
+                                style={{ gridTemplateColumns: '1fr 2rem 2rem 2rem 2rem 2rem 2rem 2.8rem 2.4rem' }}>
+                                <div>Team</div>
+                                <div className="text-center">P</div>
+                                <div className="text-center">W</div>
+                                <div className="text-center">D</div>
+                                <div className="text-center">L</div>
+                                <div className="text-center">GF</div>
+                                <div className="text-center">GA</div>
+                                <div className="text-center">GD</div>
+                                <div className="text-center font-bold">Pts</div>
+                            </div>
 
-                        {/* Team rows */}
-                        {teams.map((t, i) => {
-                            const qualified = i < 2 && groupComplete
-                            const eliminated = i >= 2 && groupComplete
-                            const inQZone = i < 2 && !groupComplete && hasStarted
+                            {/* Team rows */}
+                            {teams.map((t, i) => {
+                                const isTop2 = i < 2
+                                const isBest8Third = i === 2 && best8Third.has(t.team)
+                                const isThrough = isTop2 || isBest8Third
+                                const isEliminated = !isThrough && groupComplete
 
-                            return (
-                                <div key={t.team}
-                                    className={clsx(
-                                        'grid items-center px-3 py-2.5 text-xs transition-colors',
-                                        i < teams.length - 1 && 'border-b border-pitch-600/20',
-                                        qualified && 'bg-grass-500/5',
-                                        eliminated && 'opacity-55',
-                                    )}
-                                    style={{ gridTemplateColumns: '1.4rem 1fr 2rem 2rem 2rem 2rem 2.8rem 2.4rem 3.2rem' }}>
+                                return (
+                                    <div key={t.team}
+                                        className={clsx('grid px-3 py-2 text-xs items-center transition-opacity',
+                                            isTop2 && i === 0 ? 'bg-grass-500/10' :
+                                                isTop2 ? 'bg-grass-500/5' :
+                                                    isBest8Third ? 'bg-gold-500/5' :
+                                                        isEliminated ? 'opacity-50' : ''
+                                        )}
+                                        style={{ gridTemplateColumns: '1fr 2rem 2rem 2rem 2rem 2rem 2rem 2.8rem 2.4rem' }}>
 
-                                    {/* Position */}
-                                    <span className={clsx('text-center font-bold text-sm',
-                                        qualified ? 'text-grass-400' :
-                                            inQZone ? 'text-gold-400' :
-                                                'text-chalk-400')}>
-                                        {i + 1}
-                                    </span>
+                                        {/* Team name */}
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <span className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0',
+                                                isTop2 ? 'bg-grass-500' :
+                                                    isBest8Third ? 'bg-gold-400' :
+                                                        isEliminated ? 'bg-red-500/60' : 'bg-pitch-600')} />
+                                            <span className="text-base leading-none flex-shrink-0">{flagEmoji(t.code)}</span>
+                                            <span className={clsx('truncate',
+                                                isTop2 ? 'text-chalk-100 font-medium' :
+                                                    isBest8Third ? 'text-chalk-100 font-medium' :
+                                                        'text-chalk-400')}>
+                                                {t.team}
+                                            </span>
+                                        </div>
 
-                                    {/* Team name */}
-                                    <div className="flex items-center gap-1.5 min-w-0">
-                                        <span className="text-base leading-none flex-shrink-0">{flagEmoji(t.code)}</span>
-                                        <span className={clsx('truncate font-medium',
-                                            qualified ? 'text-chalk-100' : 'text-chalk-300')}>
-                                            {t.team}
+                                        <span className="text-center text-chalk-400">{t.mp}</span>
+                                        <span className="text-center text-chalk-300">{t.w}</span>
+                                        <span className="text-center text-chalk-400">{t.d}</span>
+                                        <span className="text-center text-chalk-400">{t.l}</span>
+                                        <span className="text-center text-chalk-400">{t.gf}</span>
+                                        <span className="text-center text-chalk-400">{t.ga}</span>
+                                        <span className={clsx('text-center font-mono text-[11px]',
+                                            t.gd > 0 ? 'text-grass-400' :
+                                                t.gd < 0 ? 'text-red-400' : 'text-chalk-400')}>
+                                            {t.gd > 0 ? `+${t.gd}` : t.gd}
+                                        </span>
+                                        <span className={clsx('text-center font-bold',
+                                            isTop2 ? 'text-grass-400' :
+                                                isBest8Third ? 'text-gold-400' : 'text-chalk-300')}>
+                                            {t.pts}
                                         </span>
                                     </div>
+                                )
+                            })}
+                        </div>
 
-                                    {/* Stats */}
-                                    <span className="text-center text-chalk-400">{t.mp}</span>
-                                    <span className="text-center text-chalk-300">{t.w}</span>
-                                    <span className="text-center text-chalk-400">{t.d}</span>
-                                    <span className="text-center text-chalk-400">{t.l}</span>
-                                    <span className={clsx('text-center font-mono text-[11px]',
-                                        t.gd > 0 ? 'text-grass-400' :
-                                            t.gd < 0 ? 'text-red-400' :
-                                                'text-chalk-400')}>
-                                        {t.gd > 0 ? `+${t.gd}` : t.gd}
-                                    </span>
-                                    <span className={clsx('text-center font-bold',
-                                        qualified ? 'text-grass-300' : 'text-chalk-200')}>
-                                        {t.pts}
-                                    </span>
-
-                                    {/* Status badge */}
-                                    <div className="flex justify-end">
-                                        {qualified && (
-                                            <span className="text-[9px] font-bold text-grass-400 bg-grass-500/15 border border-grass-500/20 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                ✓ Q
-                                            </span>
-                                        )}
-                                        {eliminated && (
-                                            <span className="text-[9px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                ✗ Out
-                                            </span>
-                                        )}
-                                        {inQZone && (
-                                            <span className="text-[9px] font-bold text-gold-400 bg-gold-500/10 border border-gold-500/20 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                                                Q Zone
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            )
-                        })}
+                        {/* Footer */}
+                        <div className="px-3 py-1.5 text-[10px] text-chalk-400 bg-pitch-900/40 space-y-0.5">
+                            <div>
+                                <span className="inline-block w-2 h-2 rounded-full bg-grass-500 mr-1" />
+                                Top 2 advance
+                            </div>
+                            <div>
+                                <span className="inline-block w-2 h-2 rounded-full bg-gold-400 mr-1" />
+                                Best 8 third places advance
+                            </div>
+                        </div>
                     </div>
                 )
             })}
@@ -417,13 +389,11 @@ function BracketView({ byStage }: { byStage: Record<string, Match[]> }) {
     return (
         <div className="overflow-x-auto pb-6 -mx-4 px-4 scrollbar-hide">
             <div className="flex items-stretch justify-center gap-4 min-w-max">
-                {/* Left Bracket */}
                 {renderColumn('LAST_32', LEFT_BRACKET.LAST_32, 'left')}
                 {renderColumn('LAST_16', LEFT_BRACKET.LAST_16, 'left')}
                 {renderColumn('QUARTER_FINALS', LEFT_BRACKET.QUARTER_FINALS, 'left')}
                 {renderColumn('SEMI_FINALS', LEFT_BRACKET.SEMI_FINALS, 'left')}
 
-                {/* Center - Finals */}
                 <div className="flex flex-col justify-center items-center gap-8 mx-2" style={{ minWidth: '150px' }}>
                     <div className="w-full">
                         <div className="text-center text-xs font-bold text-gold-400 mb-2 tracking-wider">FINAL 🏆</div>
@@ -435,7 +405,6 @@ function BracketView({ byStage }: { byStage: Record<string, Match[]> }) {
                     </div>
                 </div>
 
-                {/* Right Bracket */}
                 {renderColumn('SEMI_FINALS', RIGHT_BRACKET.SEMI_FINALS, 'right')}
                 {renderColumn('QUARTER_FINALS', RIGHT_BRACKET.QUARTER_FINALS, 'right')}
                 {renderColumn('LAST_16', RIGHT_BRACKET.LAST_16, 'right')}
@@ -451,7 +420,7 @@ function PlaceholderMatch() {
     )
 }
 
-function BracketMatch({ m, compact = false, highlight = false, align = 'left' }: { m: Match; compact?: boolean; highlight?: boolean; align?: 'left'|'right'|'center' }) {
+function BracketMatch({ m, compact = false, highlight = false, align = 'left' }: { m: Match; compact?: boolean; highlight?: boolean; align?: 'left' | 'right' | 'center' }) {
     const done = m.status === 'FINISHED'
     const live = ['IN_PLAY', 'PAUSED', 'LIVE'].includes(m.status)
     const homeWon = done && m.home_score !== null && m.away_score !== null && m.home_score > m.away_score
@@ -500,15 +469,14 @@ function BracketMatch({ m, compact = false, highlight = false, align = 'left' }:
             live ? 'border-red-500/40' : highlight ? 'border-gold-500/40' : 'border-pitch-600/40',
             align === 'center' ? 'w-full' : ''
         )}>
-            {/* Match Label */}
             {mapping && (
-                <div className={clsx("absolute top-0 px-1 py-[1px] bg-pitch-900/90 text-[8px] text-chalk-500 z-10", 
+                <div className={clsx("absolute top-0 px-1 py-[1px] bg-pitch-900/90 text-[8px] text-chalk-500 z-10",
                     align === 'right' ? 'left-0 rounded-br-lg' : 'right-0 rounded-bl-lg'
                 )}>
                     {mapping.label}
                 </div>
             )}
-            
+
             {formatTeam(true, m.home_team, m.home_team_code, homeWon)}
             <div className="h-px bg-pitch-600/40" />
             {formatTeam(false, m.away_team, m.away_team_code, awayWon)}
@@ -516,7 +484,7 @@ function BracketMatch({ m, compact = false, highlight = false, align = 'left' }:
             {!done && !live && (
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                     <div className="bg-pitch-900/95 px-2 py-0.5 rounded text-center text-[9px] text-chalk-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {formatBDDay(m.kickoff_utc)}<br/>{formatBDTime(m.kickoff_utc)}
+                        {formatBDDay(m.kickoff_utc)}<br />{formatBDTime(m.kickoff_utc)}
                     </div>
                 </div>
             )}
