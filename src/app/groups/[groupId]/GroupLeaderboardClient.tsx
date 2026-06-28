@@ -68,17 +68,11 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
         >
-            <Link href="/groups" className="flex items-center gap-1.5 text-chalk-400 hover:text-chalk-100 transition-colors text-sm">
-                <ArrowLeft size={16} /> My Groups
-            </Link>
-
-            <div className="card p-4 space-y-1">
-                <h1 className="text-xl font-bold text-chalk-100">{group.name}</h1>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-chalk-400">Invite code:</span>
-                    <span className="font-mono font-bold text-gold-400 tracking-widest">{group.code}</span>
-                </div>
-                <p className="text-xs text-chalk-400">{entries.length} member{entries.length !== 1 ? 's' : ''}</p>
+            <div className="flex items-center relative">
+                <Link href="/groups" className="flex items-center gap-1.5 text-chalk-400 hover:text-chalk-100 transition-colors text-sm absolute left-0">
+                    <ArrowLeft size={16} /> Back
+                </Link>
+                <h1 className="text-xl font-bold text-chalk-100 text-center w-full">{group.name}</h1>
             </div>
 
             {/* Swipeable tab indicator */}
@@ -132,7 +126,18 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                     })}
                 </div>
             )}
-
+            {/* Group Stage Winner Banner */}
+            {tab === 'group' && sorted.length >= 1 && sorted[0].group_scored > 0 && (
+                <div className="card p-4 text-center space-y-1 border-gold-500/40 bg-gold-500/5">
+                    <p className="text-xs text-chalk-400 uppercase tracking-wider font-semibold">Group Stage Winner</p>
+                    <div className="text-3xl">{sorted[0].avatar_emoji}</div>
+                    <p className="text-lg font-bold text-chalk-100">{sorted[0].name}</p>
+                    <p className="text-gold-400 font-bold text-sm">{sorted[0].group_pts} pts</p>
+                    <p className="text-xs text-chalk-400">
+                        {sorted[0].group_correct}/{sorted[0].group_scored} correct
+                    </p>
+                </div>
+            )}
             {/* Full table */}
             {!(tab === 'knockout' && entries.every(e => e.knockout_scored === 0)) && (
                 <div className="space-y-2">
