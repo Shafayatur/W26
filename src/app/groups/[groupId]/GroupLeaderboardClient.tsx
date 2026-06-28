@@ -181,27 +181,32 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
             )}
 
             {/* Points guide */}
-            {[
-                ['🎯 Exact score', '5 pts'],
-                ['✓ Correct result', '3 pts'],
-                ['~ Right goal diff', '+1 bonus'],
-                ['💰 Banker correct', '×2 pts'],
-                ['✗ Wrong prediction', '-1 pts'],
-                ['💀 Wrong banker', '-5 pts'],
-                ['⏱ Predict ET (correct)', '+2 pts'],
-                ['⏱ Exact ET score', '+3 bonus'],
-                ['⏱ Correct ET winner', '+2 bonus'],
-                ['⏱ Wrong ET result', '-1 pts'],
-                ['⏱ Predicted ET, no ET', '-2 pts'],
-                ['🥅 Correct pen winner', '+3 pts'],
-                ['🥅 Wrong pen winner', '-2 pts'],
-                ['🥅 Predicted pens, no pens', '-2 pts'],
-            ].map(([label, pts]) => (
-                <div key={label} className="flex items-center justify-between bg-pitch-900/40 rounded-lg px-3 py-2">
-                    <span className="text-chalk-300 text-xs">{label}</span>
-                    <span className={`font-bold text-xs ${pts.startsWith('-') ? 'text-red-400' : 'text-gold-400'}`}>{pts}</span>
+            <div className="card p-4 space-y-2">
+                <h3 className="text-xs font-semibold text-chalk-400 uppercase tracking-wider">Points guide</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                    {[
+                        ['🎯 Exact score', '5 pts'],
+                        ['✓ Correct result', '3 pts'],
+                        ['~ Right goal diff', '+1 bonus'],
+                        ['💰 Banker correct', '×2 pts'],
+                        ['✗ Wrong prediction', '-1 pts'],
+                        ['💀 Wrong banker', '-5 pts'],
+                        ['⏱ Predict ET (correct)', '+2 pts'],
+                        ['⏱ Exact ET score', '+3 bonus'],
+                        ['⏱ Correct ET winner', '+2 bonus'],
+                        ['⏱ Wrong ET result', '-1 pts'],
+                        ['⏱ Predicted ET, no ET', '-2 pts'],
+                        ['🥅 Correct pen winner', '+3 pts'],
+                        ['🥅 Wrong pen winner', '-2 pts'],
+                        ['🥅 Predicted pens, no pens', '-2 pts'],
+                    ].map(([label, pts]) => (
+                        <div key={label} className="flex items-center justify-between bg-pitch-900/40 rounded-lg px-3 py-2">
+                            <span className="text-chalk-300 text-xs">{label}</span>
+                            <span className={`font-bold text-xs ${pts.startsWith('-') ? 'text-red-400' : 'text-gold-400'}`}>{pts}</span>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
         </div>
     )
 }
