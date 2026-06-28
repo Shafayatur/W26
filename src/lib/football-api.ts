@@ -17,6 +17,8 @@ interface APIMatch {
   awayTeam: { shortName: string; tla: string; name: string }
   score: {
     fullTime: { home: number | null; away: number | null }
+    extraTime?: { home: number | null; away: number | null }
+    penalties?: { home: number | null; away: number | null }
     winner: string | null
   }
   venue: string | null
@@ -55,15 +57,21 @@ export function normalizeMatch(m: APIMatch) {
     away_team_code: m.awayTeam.tla || 'TBD',
     home_score: m.score.fullTime.home,
     away_score: m.score.fullTime.away,
+    et_home_score: m.score.extraTime?.home ?? null,
+    et_away_score: m.score.extraTime?.away ?? null,
+    penalty_winner: m.score.penalties?.home != null
+      ? (m.score.penalties.home > m.score.penalties.away
+        ? m.homeTeam.shortName || m.homeTeam.name
+        : m.awayTeam.shortName || m.awayTeam.name)
+      : null,
     status: (m.status === 'TIMED' ? 'SCHEDULED' : m.status) as any,
     stage: m.stage,
     group_name: m.group,
     matchday: m.matchday,
     kickoff_utc: m.utcDate,
     venue: m.venue,
-    winner: m.score.winner as 'HOME' | 'AWAY' | 'DRAW' | null,
+    winner: m.score.winner as 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' | null,
     updated_at: new Date().toISOString(),
-
   }
 }
 
