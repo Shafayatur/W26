@@ -59,7 +59,7 @@ export function normalizeMatch(m: APIMatch) {
     away_score: m.score.fullTime.away,
     et_home_score: m.score.extraTime?.home ?? null,
     et_away_score: m.score.extraTime?.away ?? null,
-    penalty_winner: m.score.penalties?.home != null
+    penalty_winner: m.score.penalties?.home != null && m.score.penalties?.away != null
       ? (m.score.penalties.home > m.score.penalties.away
         ? m.homeTeam.shortName || m.homeTeam.name
         : m.awayTeam.shortName || m.awayTeam.name)

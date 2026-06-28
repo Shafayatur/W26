@@ -1,6 +1,7 @@
 export type MatchStatus = 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' | 'IN_PLAY' | 'PAUSED'
 export type MatchWinner = 'HOME' | 'AWAY' | 'DRAW' | null
 
+
 export interface Match {
   id: string
   home_team: string
@@ -9,6 +10,9 @@ export interface Match {
   away_team_code: string
   home_score: number | null
   away_score: number | null
+  et_home_score: number | null
+  et_away_score: number | null
+  penalty_winner: string | null
   status: MatchStatus
   stage: string
   group_name: string | null
@@ -36,6 +40,9 @@ export interface Prediction {
   predicted_home: number
   predicted_away: number
   is_banker: boolean
+  pred_et_home: number | null
+  pred_et_away: number | null
+  pred_penalty_winner: string | null
   points_earned: number | null
   scored_at: string | null
   created_at: string
