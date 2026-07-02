@@ -1,9 +1,11 @@
 'use client'
 import { useState, useRef } from 'react'
 import { getStreakBadge } from '@/lib/points'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Swords } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
+import SideBetModal from './SideBetModal'
+import SideBetsPanel from './SideBetsPanel'
 
 type Tab = 'overall' | 'group' | 'knockout'
 
@@ -13,6 +15,8 @@ interface Entry {
     avatar_emoji: string
     streak: number
     best_streak: number
+    is_vip: boolean
+    custom_title: string | null
     overall_pts: number
     group_pts: number
     knockout_pts: number
@@ -24,10 +28,32 @@ interface Entry {
     knockout_scored: number
 }
 
+interface Match {
+    id: string
+    home_team: string
+    away_team: string
+    kickoff_utc: string
+}
+
+interface Bet {
+    id: string
+    wager: number
+    status: string
+    challenger_id: string
+    challenged_id: string
+    winner_id: string | null
+    match: { home_team: string; away_team: string; kickoff_utc: string }
+    challenger: { name: string; avatar_emoji: string }
+    challenged: { name: string; avatar_emoji: string }
+}
+
 interface Props {
     group: { id: string; name: string; code: string }
     entries: Entry[]
     currentUserId: string
+    userCoins: number
+    upcomingMatches: Match[]
+    bets: Bet[]
 }
 
 const TABS: { key: Tab; label: string }[] = [
@@ -38,8 +64,9 @@ const TABS: { key: Tab; label: string }[] = [
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉']
 
-export default function GroupLeaderboardClient({ group, entries, currentUserId }: Props) {
+export default function GroupLeaderboardClient({ group, entries, currentUserId, userCoins, upcomingMatches, bets }: Props) {
     const [tab, setTab] = useState<Tab>('overall')
+    const [challengeTarget, setChallengeTarget] = useState<Entry | null>(null)
     const touchStartX = useRef<number | null>(null)
 
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -126,18 +153,7 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                     })}
                 </div>
             )}
-            {/* Group Stage Winner Banner */}
-            {tab === 'group' && sorted.length >= 1 && sorted[0].group_scored > 0 && (
-                <div className="card p-4 text-center space-y-1 border-gold-500/40 bg-gold-500/5">
-                    <p className="text-xs text-chalk-400 uppercase tracking-wider font-semibold">Group Stage Winner</p>
-                    <div className="text-3xl">{sorted[0].avatar_emoji}</div>
-                    <p className="text-lg font-bold text-chalk-100">{sorted[0].name}</p>
-                    <p className="text-gold-400 font-bold text-sm">{sorted[0].group_pts} pts</p>
-                    <p className="text-xs text-chalk-400">
-                        {sorted[0].group_correct}/{sorted[0].group_scored} correct
-                    </p>
-                </div>
-            )}
+
             {/* Full table */}
             {!(tab === 'knockout' && entries.every(e => e.knockout_scored === 0)) && (
                 <div className="space-y-2">
@@ -158,6 +174,7 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                                 <span className="text-xl">{entry.avatar_emoji}</span>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-semibold text-chalk-100 flex items-center gap-1.5 flex-wrap">
+                                        {entry.is_vip && <span>👑</span>}
                                         {entry.name}
                                         {isMe && <span className="text-xs text-grass-400">(you)</span>}
                                         {streakBadge && (
@@ -166,6 +183,9 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                                             </span>
                                         )}
                                     </div>
+                                    {entry.custom_title && (
+                                        <div className="text-xs text-gold-400">{entry.custom_title}</div>
+                                    )}
                                     <div className="text-xs text-chalk-400 mt-0.5">
                                         {correct}/{scored} correct · {accuracy}% accuracy
                                     </div>
@@ -174,9 +194,33 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                                     <div className="text-lg font-bold text-gold-400">{pts}</div>
                                     <div className="text-xs text-chalk-400">pts</div>
                                 </div>
+                                {!isMe && (
+                                    <button
+                                        onClick={() => setChallengeTarget(entry)}
+                                        className="flex-shrink-0 p-2 rounded-lg border border-pitch-600/40 text-chalk-400 hover:border-gold-500/40 hover:text-gold-400 transition-all"
+                                        title={`Challenge ${entry.name}`}>
+                                        <Swords size={14} />
+                                    </button>
+                                )}
                             </div>
                         )
                     })}
+                </div>
+            )}
+
+            {/* Side bets panel */}
+            <SideBetsPanel userId={currentUserId} bets={bets} userCoins={userCoins} />
+
+            {/* Group Stage Winner Banner */}
+            {tab === 'group' && sorted.length >= 1 && sorted[0].group_scored > 0 && (
+                <div className="card p-4 text-center space-y-1 border-gold-500/40 bg-gold-500/5">
+                    <p className="text-xs text-chalk-400 uppercase tracking-wider font-semibold">Group Stage Winner</p>
+                    <div className="text-3xl">{sorted[0].avatar_emoji}</div>
+                    <p className="text-lg font-bold text-chalk-100">{sorted[0].name}</p>
+                    <p className="text-gold-400 font-bold text-sm">{sorted[0].group_pts} pts</p>
+                    <p className="text-xs text-chalk-400">
+                        {sorted[0].group_correct}/{sorted[0].group_scored} correct
+                    </p>
                 </div>
             )}
 
@@ -200,13 +244,26 @@ export default function GroupLeaderboardClient({ group, entries, currentUserId }
                         ['🥅 Wrong pen winner', '-2 pts'],
                         ['🥅 Predicted pens, no pens', '-2 pts'],
                     ].map(([label, pts]) => (
-                        <div key={label} className="flex items-center justify-between bg-pitch-900/40 rounded-lg px-3 py-2">
-                            <span className="text-chalk-300 text-xs">{label}</span>
-                            <span className={`font-bold text-xs ${pts.startsWith('-') ? 'text-red-400' : 'text-gold-400'}`}>{pts}</span>
+                        <div key={label} className="flex flex-col gap-1 bg-pitch-900/40 rounded-xl px-3 py-2.5 border border-pitch-700/30">
+                            <span className="text-chalk-300 text-xs leading-tight">{label}</span>
+                            <span className={`font-bold text-sm ${pts.startsWith('-') ? 'text-red-400' : 'text-gold-400'}`}>{pts}</span>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* Challenge modal */}
+            {challengeTarget && (
+                <SideBetModal
+                    challengerId={currentUserId}
+                    challengedId={challengeTarget.id}
+                    challengedName={challengeTarget.name}
+                    challengedEmoji={challengeTarget.avatar_emoji}
+                    userCoins={userCoins}
+                    upcomingMatches={upcomingMatches}
+                    onClose={() => setChallengeTarget(null)}
+                />
+            )}
         </div>
     )
 }

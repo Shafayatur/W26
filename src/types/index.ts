@@ -31,6 +31,14 @@ export interface Profile {
   streak: number
   best_streak: number
   created_at: string
+  coins?: number
+  coin_streak?: number
+  coin_streak_milestone?: number
+  daily_wins?: number
+  is_vip?: boolean
+  custom_title?: string | null
+  unlocked_avatars?: string[]
+  wildcard_used_matchdays?: number[]
 }
 
 export interface Prediction {
@@ -40,6 +48,8 @@ export interface Prediction {
   predicted_home: number
   predicted_away: number
   is_banker: boolean
+  is_super_banker?: boolean
+  lifeline_used?: boolean
   pred_et_home: number | null
   pred_et_away: number | null
   pred_penalty_winner: string | null
@@ -87,6 +97,47 @@ export const BADGE_DEFINITIONS = [
   { key: 'cold_streak', emoji: '🧊', label: 'Frozen', desc: '3 wrong in a row' },
 ] as const
 
+
+export interface CoinTransaction {
+  id: string
+  user_id: string
+  amount: number
+  reason: string
+  meta: Record<string, any> | null
+  created_at: string
+}
+
+export interface TriviaQuestion {
+  id: string
+  question: string
+  options: string[]
+  correct_index: number
+  active_date: string
+  created_at: string
+}
+
+export interface TriviaAnswer {
+  id: string
+  user_id: string
+  question_id: string
+  selected_index: number
+  is_correct: boolean
+  created_at: string
+}
+
+export type SideBetStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'RESOLVED' | 'CANCELLED'
+
+export interface SideBet {
+  id: string
+  challenger_id: string
+  challenged_id: string
+  match_id: string
+  wager: number
+  status: SideBetStatus
+  winner_id: string | null
+  created_at: string
+  resolved_at: string | null
+}
 
 export interface Group {
   id: string

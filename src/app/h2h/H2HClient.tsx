@@ -17,8 +17,12 @@ interface Prediction {
     user_id: string
     predicted_home: number
     predicted_away: number
+    pred_et_home: number | null
+    pred_et_away: number | null
+    pred_penalty_winner: string | null
     points_earned: number
     is_banker: boolean
+    is_super_banker?: boolean
     scored_at: string
     matches: {
         id: string
@@ -26,8 +30,12 @@ interface Prediction {
         away_team: string
         home_score: number
         away_score: number
+        et_home_score: number | null
+        et_away_score: number | null
+        penalty_winner: string | null
         kickoff_utc: string
         status: string
+        stage: string
     }
 }
 
@@ -173,6 +181,12 @@ export default function H2HClient({ currentUserId, members, predictions }: Props
                                     {match.home_team} {match.home_score} – {match.away_score} {match.away_team}
                                     <span className="ml-2 text-chalk-400">· {formatBDDay(match.kickoff_utc)}</span>
                                 </div>
+                                {match.et_home_score !== null && (
+                                    <div className="text-xs text-chalk-500 text-center">
+                                        AET: {match.et_home_score}–{match.et_away_score}
+                                        {match.penalty_winner && <span> · 🥅 {match.penalty_winner} won on penalties</span>}
+                                    </div>
+                                )}
 
                                 <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${preds.length}, 1fr)` }}>
                                     {preds.map(({ uid, pred }) => {
@@ -187,8 +201,19 @@ export default function H2HClient({ currentUserId, members, predictions }: Props
                                                 <div className="text-base">{memberMap[uid]?.avatar_emoji}</div>
                                                 <div className="font-mono text-xs font-bold text-chalk-200">
                                                     {pred ? `${pred.predicted_home}–${pred.predicted_away}` : '—'}
-                                                    {pred?.is_banker && ' 💰'}
+                                                    {pred?.is_super_banker && ' ⚡'}
+                                                    {pred?.is_banker && !pred?.is_super_banker && ' 💰'}
                                                 </div>
+                                                {pred?.pred_et_home != null && (
+                                                    <div className="font-mono text-[10px] text-chalk-500">
+                                                        ET: {pred.pred_et_home}–{pred.pred_et_away}
+                                                    </div>
+                                                )}
+                                                {pred?.pred_penalty_winner && (
+                                                    <div className="text-[10px] text-chalk-500">
+                                                        🥅 {pred.pred_penalty_winner}
+                                                    </div>
+                                                )}
                                                 <div className={clsx('text-xs font-bold', getPointsColor(pts))}>
                                                     {pts > 0 ? `+${pts}` : pts} pts
                                                 </div>

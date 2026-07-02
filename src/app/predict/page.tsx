@@ -4,6 +4,7 @@ import MatchCard from '@/components/ui/MatchCard'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Zap } from 'lucide-react'
+import WildcardSection from './WildcardSection'
 
 export const revalidate = 60
 
@@ -11,16 +12,46 @@ export default async function PredictPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
-  
 
-  const [{ data: matches }, { data: predictions }] = await Promise.all([
+  const [{ data: matches }, { data: predictions }, { data: profile }, { data: finishedPreds }] = await Promise.all([
     supabase.from('matches').select('*').eq('status', 'SCHEDULED').order('kickoff_utc', { ascending: true }).limit(30),
     supabase.from('predictions').select('*').eq('user_id', user.id),
+    supabase.from('profiles').select('coins, wildcard_used_matchdays').eq('id', user.id).single(),
+    // Find up to 3 worst predictions from finished matchdays (exclude already wildcarded)
+    supabase
+      .from('predictions')
+      .select('id, match_id, points_earned, predicted_home, predicted_away, matches(home_team, away_team, home_score, away_score, matchday, status)')
+      .eq('user_id', user.id)
+      .lt('points_earned', 0)
+      .not('points_earned', 'is', null),
   ])
 
   const predMap = Object.fromEntries((predictions ?? []).map(p => [p.match_id, p]))
   const unpredicted = (matches ?? []).filter(m => !predMap[m.id])
   const predicted = (matches ?? []).filter(m => !!predMap[m.id])
+
+  // Find up to 3 worst predictions from a finished matchday (exclude ones already wildcarded)
+  const wildcardUsed: number[] = profile?.wildcard_used_matchdays ?? []
+  const worstPreds = (finishedPreds ?? [])
+    .filter(p => {
+      const m = p.matches as any
+      return m?.status === 'FINISHED' && m?.matchday && !wildcardUsed.includes(m.matchday)
+    })
+    .sort((a, b) => (a.points_earned ?? 0) - (b.points_earned ?? 0))
+    .slice(0, 3)
+
+  const worstOptions = worstPreds.map(wp => ({
+    id: wp.id,
+    match_id: wp.match_id,
+    points_earned: wp.points_earned!,
+    matchday: (wp.matches as any).matchday,
+    home_team: (wp.matches as any).home_team,
+    away_team: (wp.matches as any).away_team,
+    predicted_home: wp.predicted_home,
+    predicted_away: wp.predicted_away,
+    home_score: (wp.matches as any).home_score,
+    away_score: (wp.matches as any).away_score,
+  }))
 
   return (
     <AppShell>
@@ -39,6 +70,16 @@ export default async function PredictPage() {
               style={{ width: `${(predicted.length / (matches ?? []).length) * 100}%` }}
             />
           </div>
+        )}
+
+        {/* Wildcard section */}
+        {worstOptions.length > 0 && (
+          <WildcardSection
+            userId={user.id}
+            userCoins={profile?.coins ?? 0}
+            worstPredictions={worstOptions}
+            wildcardUsedMatchdays={wildcardUsed}
+          />
         )}
 
         {unpredicted.length > 0 && (

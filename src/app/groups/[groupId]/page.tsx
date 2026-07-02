@@ -10,14 +10,14 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/auth')
 
-    const [{ data: group }, { data: members }] = await Promise.all([
+    const [{ data: group }, { data: members }, { data: profile }, { data: upcomingMatches }, { data: myBets }] = await Promise.all([
         supabase.from('groups').select('*').eq('id', params.groupId).single(),
         supabase
             .from('group_members')
             .select(`
                 *,
                 profiles(
-                    id, name, avatar_emoji, streak, best_streak,
+                    id, name, avatar_emoji, streak, best_streak, is_vip, custom_title,
                     predictions(
                         id, points_earned,
                         matches(stage)
@@ -25,6 +25,20 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
                 )
             `)
             .eq('group_id', params.groupId),
+        supabase.from('profiles').select('coins').eq('id', user.id).single(),
+        supabase
+            .from('matches')
+            .select('id, home_team, away_team, kickoff_utc')
+            .eq('status', 'SCHEDULED')
+            .order('kickoff_utc', { ascending: true })
+            .limit(20),
+        supabase
+            .from('side_bets')
+            .select('*, match:match_id(home_team, away_team, kickoff_utc), challenger:challenger_id(name, avatar_emoji), challenged:challenged_id(name, avatar_emoji)')
+            .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
+            .in('status', ['PENDING', 'ACCEPTED', 'RESOLVED'])
+            .order('created_at', { ascending: false })
+            .limit(20),
     ])
 
     if (!group) notFound()
@@ -57,6 +71,8 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
                 avatar_emoji: p.avatar_emoji,
                 streak: p.streak,
                 best_streak: p.best_streak,
+                is_vip: p.is_vip ?? false,
+                custom_title: p.custom_title ?? null,
                 overall_pts: overall.pts,
                 overall_correct: overall.correct,
                 overall_scored: overall.scored,
@@ -70,12 +86,27 @@ export default async function GroupLeaderboardPage({ params }: { params: { group
         })
         .filter(Boolean) as any[]
 
+    const bets = (myBets ?? []).map(b => ({
+        id: b.id,
+        wager: b.wager,
+        status: b.status,
+        challenger_id: b.challenger_id,
+        challenged_id: b.challenged_id,
+        winner_id: b.winner_id,
+        match: b.match as any,
+        challenger: b.challenger as any,
+        challenged: b.challenged as any,
+    }))
+
     return (
         <AppShell>
             <GroupLeaderboardClient
                 group={{ id: group.id, name: group.name, code: group.code }}
                 entries={entries}
                 currentUserId={user.id}
+                userCoins={profile?.coins ?? 0}
+                upcomingMatches={(upcomingMatches ?? []) as any}
+                bets={bets}
             />
         </AppShell>
     )

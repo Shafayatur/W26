@@ -17,6 +17,8 @@ interface APIMatch {
   awayTeam: { shortName: string; tla: string; name: string }
   score: {
     fullTime: { home: number | null; away: number | null }
+    regularTime?: { home: number | null; away: number | null }
+    halfTime?: { home: number | null; away: number | null }
     extraTime?: { home: number | null; away: number | null }
     penalties?: { home: number | null; away: number | null }
     winner: string | null
@@ -49,16 +51,45 @@ export async function fetchMatchById(matchId: string): Promise<APIMatch> {
 }
 
 export function normalizeMatch(m: APIMatch) {
+  // VERIFIED against real football-data.org response (match 537415):
+  // fullTime folds regularTime + penalties together for shootout matches
+  // (e.g. regularTime 1-1, penalties 3-4 → fullTime incorrectly shows 4-5).
+  // regularTime is the genuine 90-minute score — always use this when present.
+  const home90 = m.score.regularTime?.home ?? m.score.fullTime.home
+  const away90 = m.score.regularTime?.away ?? m.score.fullTime.away
+
+  // extraTime is confirmed to be goals scored DURING extra time only
+  // (e.g. 0-0 means no ET goals, not "ET ended 0-0"). Cumulative AET score
+  // = regularTime + extraTime. This correctly produces "1-1 AET" when
+  // 90 min was 1-1 and no one scored in extra time.
+  let etHome: number | null = null
+  let etAway: number | null = null
+  if (m.score.extraTime?.home != null && m.score.extraTime?.away != null) {
+    etHome = (home90 ?? 0) + m.score.extraTime.home
+    etAway = (away90 ?? 0) + m.score.extraTime.away
+  }
+
+  // VERIFIED bug: score.winner from the API reflects the OVERALL match
+  // outcome (including penalties for shootout matches) — same root issue
+  // as fullTime. For match 537418 (Netherlands vs Morocco), regularTime
+  // was 1-1 but score.winner said "AWAY_TEAM" (Morocco's penalty win).
+  // We must derive winner from the 90-minute score ourselves so it always
+  // reflects the regular-time result, consistent with home_score/away_score.
+  let derivedWinner: 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' | null = null
+  if (home90 != null && away90 != null) {
+    derivedWinner = home90 > away90 ? 'HOME_TEAM' : home90 < away90 ? 'AWAY_TEAM' : 'DRAW'
+  }
+
   return {
     id: String(m.id),
     home_team: m.homeTeam.shortName || m.homeTeam.name || m.homeTeam.tla || 'TBD',
     away_team: m.awayTeam.shortName || m.awayTeam.name || m.awayTeam.tla || 'TBD',
     home_team_code: m.homeTeam.tla || 'TBD',
     away_team_code: m.awayTeam.tla || 'TBD',
-    home_score: m.score.fullTime.home,
-    away_score: m.score.fullTime.away,
-    et_home_score: m.score.extraTime?.home ?? null,
-    et_away_score: m.score.extraTime?.away ?? null,
+    home_score: home90,
+    away_score: away90,
+    et_home_score: etHome,
+    et_away_score: etAway,
     penalty_winner: m.score.penalties?.home != null && m.score.penalties?.away != null
       ? (m.score.penalties.home > m.score.penalties.away
         ? m.homeTeam.shortName || m.homeTeam.name
@@ -70,7 +101,7 @@ export function normalizeMatch(m: APIMatch) {
     matchday: m.matchday,
     kickoff_utc: m.utcDate,
     venue: m.venue,
-    winner: m.score.winner as 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' | null,
+    winner: derivedWinner,
     updated_at: new Date().toISOString(),
   }
 }

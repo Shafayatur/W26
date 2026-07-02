@@ -9,7 +9,7 @@ export default async function H2HPage() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/auth')
-    
+
 
     // Step 1: get user's group ids
     const { data: myGroups } = await supabase
@@ -40,7 +40,7 @@ export default async function H2HPage() {
     const { data: allPredictions } = memberIds.length > 0
         ? await supabase
             .from('predictions')
-            .select('*, matches(id, home_team, away_team, home_score, away_score, kickoff_utc, status)')
+            .select('*, matches(id, home_team, away_team, home_score, away_score, et_home_score, et_away_score, penalty_winner, kickoff_utc, status, stage)')
             .in('user_id', memberIds)
             .not('points_earned', 'is', null)
             .order('scored_at', { ascending: false })

@@ -15,7 +15,7 @@ export default async function PredictMatchPage({ params }: { params: { matchId: 
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
-  
+
 
   // Get all groups this user belongs to
   const { data: myMemberships } = await supabase
@@ -33,13 +33,14 @@ export default async function PredictMatchPage({ params }: { params: { matchId: 
 
   const visibleUserIds = Array.from(new Set((groupMembers ?? []).map(m => m.user_id)))
 
-  const [{ data: match }, { data: myPred }, { data: allPreds }] = await Promise.all([
+  const [{ data: match }, { data: myPred }, { data: allPreds }, { data: profile }] = await Promise.all([
     supabase.from('matches').select('*').eq('id', params.matchId).single(),
     supabase.from('predictions').select('*').eq('match_id', params.matchId).eq('user_id', user.id).maybeSingle(),
     supabase.from('predictions')
       .select('*, profiles(id, name, avatar_emoji), reactions(*), comments(*, profiles(name, avatar_emoji))')
       .eq('match_id', params.matchId)
       .in('user_id', visibleUserIds.length > 0 ? visibleUserIds : [user.id]),
+    supabase.from('profiles').select('coins').eq('id', user.id).single(),
   ])
 
   if (!match) notFound()
@@ -87,7 +88,7 @@ export default async function PredictMatchPage({ params }: { params: { matchId: 
           )}
         </div>
 
-        <PredictForm match={m} existingPrediction={myPred} userId={user.id} isLocked={isLocked} />
+        <PredictForm match={m} existingPrediction={myPred} userId={user.id} isLocked={isLocked} userCoins={profile?.coins ?? 0} />
         {(allPreds ?? []).length > 0 && (
           <FamilyPicks predictions={allPreds ?? []} currentUserId={user.id} matchFinished={isFinished} actualHome={m.home_score} actualAway={m.away_score} />
         )}
