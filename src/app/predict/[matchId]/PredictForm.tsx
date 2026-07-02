@@ -81,7 +81,7 @@ export default function PredictForm({ match, existingPrediction, userId, isLocke
       setHomeScore(existingPrediction.predicted_home)
       setAwayScore(existingPrediction.predicted_away)
       setIsBanker(existingPrediction.is_banker)
-      setIsSuperBanker(existingPrediction.is_super_banker)
+      setIsSuperBanker(!!existingPrediction.is_super_banker)
     }
   }
 
