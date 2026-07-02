@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Crown, Smile, Tag } from 'lucide-react'
 import clsx from 'clsx'
 
-const AVATARS = ['⚽', '🏆', '🥇', '🎯', '🔥', '⚡', '🦁', '🐯', '🦅', '🇧🇷', '🇦🇷', '🇫🇷', '🇩🇪', '🇪🇸', '🇵🇹', '🏴󠁧󠁢󠁥󠁮󠁧󠁿']
+const AVATARS = ['⚽', '🏆', '🥇', '🎯', '🔥', '⚡', '🦁', '🐯', '🦅', '🇧🇷', '🇦🇷', '🇫🇷', '🇩🇪', '🇪🇸', '🇵🇹', '🇮🇹']
 const TITLES = [
     { key: 'the_oracle', label: 'The Oracle', emoji: '🔮' },
     { key: 'upset_king', label: 'Upset King', emoji: '👑' },

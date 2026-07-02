@@ -66,7 +66,7 @@ export default function TriviaCard({
                 <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider">⚽ Daily Trivia</p>
                 {!answered && (
                     <span className="text-xs text-chalk-400 bg-pitch-700/60 px-2 py-0.5 rounded-full">
-                        +1 coin if correct
+                        🪙 +1
                     </span>
                 )}
                 {answered && isCorrect && (
